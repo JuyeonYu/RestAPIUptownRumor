@@ -1,16 +1,19 @@
-from DatabaseManager import DatabaseManager
 from flask_restful import Resource, reqparse
 from flask import jsonify, request
-
-db = DatabaseManager('ddol.site', 'root', 'Qwer!234!@#$', 'uptown_rumor_temp')
+import pymysql
 
 class Post(Resource):
     # 글쓰기
     def post(self):
+        conn = pymysql.connect(host='ddol.site', user='root', password='Qwer!234!@#$', db='uptown_rumor_temp',
+                               charset='utf8')
+        curs = conn.cursor()
+
         parser = reqparse.RequestParser()
         parser.add_argument('title', type=str)
         parser.add_argument('content', type=str)
         parser.add_argument('region_code', type=int)
+
 
         args = parser.parse_args()
         title = args['title']
@@ -19,14 +22,20 @@ class Post(Resource):
 
         sql = f"insert into post (title, content, region_code) values ('{title}', '{content}', '{region_code}')"
 
-        db.curs.execute(sql)
-        db.conn.commit()
+        curs.execute(sql)
+        conn.commit()
+        curs.close()
+        conn.close()
+
 
         result = {"status": 200, "message":"ok"}
         return jsonify(result)
 
     # 글조회
     def get(self):
+        conn = pymysql.connect(host='ddol.site', user='root', password='Qwer!234!@#$', db='uptown_rumor_temp',
+                               charset='utf8')
+        curs = conn.cursor()
         parser = reqparse.RequestParser()
         parser.add_argument('idx', type=int)
         parser.add_argument('region_code', type=int)
@@ -43,11 +52,13 @@ class Post(Resource):
         else:
             sql = f"select * from post where idx = ('{idx}')"
 
-        db.curs.execute(sql)
-        row_headers = [x[0] for x in db.curs.description]  # this will extract row headers
+        curs.execute(sql)
+        row_headers = [x[0] for x in curs.description]  # this will extract row headers
 
-        db.conn.commit()
-        rows = db.curs.fetchall()
+        conn.commit()
+        rows = curs.fetchall()
+        curs.close()
+        conn.close()
 
         post_data = []
         for result in rows:
@@ -59,6 +70,9 @@ class Post(Resource):
 
     # 글수정
     def put(self):
+        conn = pymysql.connect(host='ddol.site', user='root', password='Qwer!234!@#$', db='uptown_rumor_temp',
+                               charset='utf8')
+        curs = conn.cursor()
         parser = reqparse.RequestParser()
         parser.add_argument('idx', type=int)
         parser.add_argument('title', type=str)
@@ -71,15 +85,19 @@ class Post(Resource):
         content = args['content']
 
         sql = f"update post set title = '{title}', content = '{content}' where idx = '{idx}'"
-        db.curs.execute(sql)
-        db.conn.commit()
-        status = 1
+        curs.execute(sql)
+        conn.commit()
+        curs.close()
+        conn.close()
 
         result = {"status": 200, "message":"ok"}
         return jsonify(result)
 
     # 글삭제
     def delete(self):
+        conn = pymysql.connect(host='ddol.site', user='root', password='Qwer!234!@#$', db='uptown_rumor_temp',
+                               charset='utf8')
+        curs = conn.cursor()
         parser = reqparse.RequestParser()
         parser.add_argument('idx', type=int)
 
@@ -88,8 +106,10 @@ class Post(Resource):
         idx = args['idx']
 
         sql = f"delete from post where idx = ('{idx}')"
-        db.curs.execute(sql)
-        db.conn.commit()
-        row = db.curs.fetchone()
+        curs.execute(sql)
+        conn.commit()
+        row = curs.fetchone()
+        curs.close()
+        conn.close()
         result = {'status':1, "message":row}
         return jsonify(result)
