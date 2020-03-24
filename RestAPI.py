@@ -9,10 +9,12 @@ class Post(Resource):
         conn = pymysql.connect(host='ddol.site', user='root', password='Qwer!234!@#$', db='uptown_rumor_temp',
                                charset='utf8')
         curs = conn.cursor()
+
         parser = reqparse.RequestParser()
         parser.add_argument('title', type=str)
         parser.add_argument('content', type=str)
         parser.add_argument('region_code', type=int)
+
 
         args = parser.parse_args()
         title = args['title']
@@ -23,6 +25,9 @@ class Post(Resource):
 
         curs.execute(sql)
         conn.commit()
+        curs.close()
+        conn.close()
+
 
         result = {"status": 200, "message":"ok"}
         return jsonify(result)
@@ -53,6 +58,8 @@ class Post(Resource):
 
         conn.commit()
         rows = curs.fetchall()
+        curs.close()
+        conn.close()
 
         post_data = []
         for result in rows:
@@ -82,6 +89,8 @@ class Post(Resource):
         curs.execute(sql)
         conn.commit()
         status = 1
+        curs.close()
+        conn.close()
 
         result = {"status": 200, "message":"ok"}
         return jsonify(result)
@@ -102,6 +111,8 @@ class Post(Resource):
         curs.execute(sql)
         conn.commit()
         row = curs.fetchone()
+        curs.close()
+        conn.close()
         result = {'status':1, "message":row}
         return jsonify(result)
 
