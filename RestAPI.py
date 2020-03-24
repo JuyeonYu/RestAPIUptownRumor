@@ -134,6 +134,8 @@ class Region(Resource):
         if depth is 0:
             sql = f"select * from area where depth = ('{depth}')"
 
+
+        # index가 있으면 index가 부모인 자식 지역을 검색
         if index is not None:
             sql = f"select * from area where parent_idx = ('{index}')"
 
